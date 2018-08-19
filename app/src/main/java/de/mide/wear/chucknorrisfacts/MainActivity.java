@@ -35,6 +35,7 @@ import java.net.URL;
 public class MainActivity extends WearableActivity
                           implements View.OnClickListener {
 
+    /** Kennzeichnungs-String ("Schildchen") für Log-Nachrichten. */
     public static final String TAG4LOGGING = "ChuckNorris";
 
 
@@ -47,7 +48,7 @@ public class MainActivity extends WearableActivity
 
     /**
      * Lifecycle-Methode. Nachdem alle Initialisierungen vorgenommen sind
-     * wird ein Witz geladen.
+     * wird gleich ein Witz geladen.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +58,11 @@ public class MainActivity extends WearableActivity
         _textView = (TextView) findViewById(R.id.text);
         _textView.setOnClickListener(this);
 
-        // Enables Always-on
-        setAmbientEnabled();
+        setAmbientEnabled(); // Enables Always-on
 
         MeinThread mt = new MeinThread();
         mt.start();
+        // Kurzform: new MeinThread().start();
     }
 
 
@@ -227,13 +228,16 @@ public class MainActivity extends WearableActivity
         // Unterobjekt mit dem eigentlichen Witz holen.
         JSONObject unterObjekt = mainObjekt.getJSONObject("value");
 
-        int witzID = unterObjekt.getInt("id");
+        int witzID        = unterObjekt.getInt("id");
         String witzString = unterObjekt.getString("joke");
         // unterObjekt hat unter dem Key "categories" noch einen Array mit den
         // gewählten Kategorien (z.B. "nerdy" oder "explicit"), aber das
         // lesen wir nicht aus.
 
         Log.i(TAG4LOGGING, "Witz " + witzID + ": " + witzString);
+
+        // Sonderzeichen ersetzen
+        witzString = witzString.replace("&quot;", "\""); // Anführungszeichen ersetzen
 
         return witzString;
     }
