@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -14,6 +17,21 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Activity fetches "Chuck Norris Facts" (short jokes) from Web-API.
+ * <br><br>
+ *
+ * Alternate approach for refresh of joke might be
+ * {@link android.support.v4.widget.SwipeRefreshLayout}, see
+ * <a href="http://www.vogella.com/tutorials/SwipeToRefresh/article.html">this tutorial</a>.
+ * <br><br>
+ *
+ * This project is licensed under the terms of the BSD 3-Clause License.
+ * <br><br>
+ *
+ * The author of this app is neither related to Chuck Norris nor to the
+ * developer/provider of the Web-API <a href="http://www.icndb.com/api/">icndb.com</a>.
+ */
 public class MainActivity extends WearableActivity
                           implements View.OnClickListener {
 
@@ -75,6 +93,8 @@ public class MainActivity extends WearableActivity
      */
     protected void zeigeTextInMainThread(String text) {
 
+        // Für Instanz von anonymer Klasse muss der String (Closure)
+        // muss die lokale Variable nicht-änderbar sein.
         final String text2 = text;
 
         Runnable runnable = new Runnable() {
@@ -85,6 +105,10 @@ public class MainActivity extends WearableActivity
         };
 
         runOnUiThread(runnable);
+
+        // Alternative zu runOnUIThread(): Runnable-Objekt an Methode "post()"
+        // von beliebigem View-Element übergeben.
+        //_textView.post(runnable);
     }
 
 
@@ -112,10 +136,21 @@ public class MainActivity extends WearableActivity
 
             String ergebnisStr = holeWitz();
             if (ergebnisStr.length() > 0) {
-                zeigeTextInMainThread(ergebnisStr);
+
+                try {
+                    String witz = extrahiereWitzAusJson(ergebnisStr);
+                    zeigeTextInMainThread(witz);
+                }
+                catch (JSONException ex) {
+                    Log.e(TAG4LOGGING, "Fehler beim Parsen des JSON-Strings: " + ex.getMessage());
+                    zeigeTextInMainThread("Fehler: " + ex.getMessage());
+                }
+
+            } else {
+
+                Log.w(TAG4LOGGING, "Lehrer String als JSON-Antwort von Methode holeWitz() erhalten.");
             }
         }
-
     };
 
     /* *************************************** */
@@ -164,6 +199,43 @@ public class MainActivity extends WearableActivity
         }
 
         return httpErgebnisDokument;
+    }
+
+
+    /**
+     * Methode für parsen der JSON-Antwort von der Web-API, um den eigentlichen
+     * Witz zu erhalten.
+     *
+     * @param jsonString Komplettes JSON-Dokument, das von der Web-API geliefert wurde
+     *
+     * @return String mit Kurzwitz
+     *
+     * @throws JSONException Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
+     *                       für einen bestimmten Key kein Wert des entsprechenden
+     *                       Datentypes gefunden wird.
+     */
+    protected String extrahiereWitzAusJson(String jsonString) throws JSONException {
+
+        JSONObject mainObjekt = new JSONObject(jsonString);
+
+        String typeString = mainObjekt.getString("type");
+        if (typeString.equalsIgnoreCase("success") == false) {
+            return "Status in Ergebnis-Dokument war nicht \"success\" sondern \"" +
+                    typeString + "\".";
+        }
+
+        // Unterobjekt mit dem eigentlichen Witz holen.
+        JSONObject unterObjekt = mainObjekt.getJSONObject("value");
+
+        int witzID = unterObjekt.getInt("id");
+        String witzString = unterObjekt.getString("joke");
+        // unterObjekt hat unter dem Key "categories" noch einen Array mit den
+        // gewählten Kategorien (z.B. "nerdy" oder "explicit"), aber das
+        // lesen wir nicht aus.
+
+        Log.i(TAG4LOGGING, "Witz " + witzID + ": " + witzString);
+
+        return witzString;
     }
 
 }
