@@ -118,8 +118,12 @@ public class MainActivity extends WearableActivity
     /* *************************************** */
 
     /**
-     * Innere Klasse für Netzwerk-Zugriff und Auswertung
-     * Ergebnis-Dokument,
+     * Innere Klasse für Netzwerk-Zugriff und Auswertung Ergebnis-Dokument
+     * (Parsen der JSON-Datei, die als Antwort von der Web-API geschickt wurde).
+     * Nach Erzeugung einer Instanz dieser Klasse muss die Methode
+     * {@link Thread#start()} aufgerufen werden (<b>NICHT</b> die
+     * Methode {@link Thread#run()} direkt aufrufen, sonst wird der
+     * Code nicht in einem Hintergrund-Thread ausgeführt).
      */
     protected class MeinThread extends Thread {
 
