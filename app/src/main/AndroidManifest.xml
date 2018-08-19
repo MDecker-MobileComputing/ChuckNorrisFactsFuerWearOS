@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.mide.wear.chucknorrisfacts">
+    package="de.mide.wear.chucknorrisfacts"
+    android:versionCode="1"
+	android:versionName="0.8 (August 2018)">
 
     <uses-feature android:name="android.hardware.type.watch" />
 

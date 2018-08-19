@@ -137,23 +137,23 @@ public class MainActivity extends WearableActivity
 
             _ladevorgangLaueft = true;
 
-            zeigeTextInMainThread("Lade ...");
+
+            zeigeTextInMainThread( getString(R.string.loading ));
 
             String ergebnisStr = holeWitz();
             if (ergebnisStr.length() > 0) {
 
                 try {
                     String witz = extrahiereWitzAusJson(ergebnisStr);
-                    zeigeTextInMainThread(witz);
+                    zeigeTextInMainThread( witz );
                 }
                 catch (JSONException ex) {
                     Log.e(TAG4LOGGING, "Fehler beim Parsen des JSON-Strings: " + ex.getMessage());
-                    zeigeTextInMainThread("Fehler: " + ex.getMessage());
+                    zeigeTextInMainThread( getString(R.string.error) + ex.getMessage() );
                 }
 
             } else {
-
-                Log.w(TAG4LOGGING, "Lehrer String als JSON-Antwort von Methode holeWitz() erhalten.");
+                Log.w(TAG4LOGGING, "Leerer String als JSON-Antwort von Methode holeWitz() erhalten.");
             }
         }
     };
@@ -176,11 +176,11 @@ public class MainActivity extends WearableActivity
         try {
             URL url = new URL("http://api.icndb.com/jokes/random?limitTo=[nerdy]");
             conn = (HttpURLConnection)url.openConnection();
-            //conn.setRequestMethod("GET"); // Default
+            conn.setRequestMethod("GET"); // Eigentlich nicht nötig, weil "GET" Default-Wert ist.
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 
-                zeigeTextInMainThread("HTTP-Fehler: " + conn.getResponseMessage());
+                zeigeTextInMainThread( getString(R.string.http_error) + conn.getResponseMessage() );
 
             } else {
 
@@ -196,7 +196,7 @@ public class MainActivity extends WearableActivity
         }
         catch (Exception ex) {
             Log.e(TAG4LOGGING, "Fehler beim HTTP-Zugriff: " + ex.getMessage());
-            zeigeTextInMainThread("Fehler: " + ex.getMessage());
+            zeigeTextInMainThread( getString(R.string.error) + ex.getMessage() );
         }
         finally {
             if (conn != null) { conn.disconnect(); }
@@ -224,9 +224,9 @@ public class MainActivity extends WearableActivity
         JSONObject mainObjekt = new JSONObject(jsonString);
 
         String typeString = mainObjekt.getString("type");
+
         if (typeString.equalsIgnoreCase("success") == false) {
-            return "Status in Ergebnis-Dokument war nicht \"success\" sondern \"" +
-                    typeString + "\".";
+            throw new JSONException( getString( R.string.status_not_success) + typeString );
         }
 
         // Unterobjekt mit dem eigentlichen Witz holen.

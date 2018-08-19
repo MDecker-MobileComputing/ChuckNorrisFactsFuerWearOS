@@ -4,5 +4,11 @@
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
     -->
-    <string name="refresh_hinweis">Text oben berühren, um anderen <i>Chuck Norris Fact</i> zu laden.</string>
+    <string name="refresh_hinweis">Touch text above to load another <i>Chuck Norris Fact</i>.</string>
+
+    <!-- Text to be referenced in Java code; &#160; is a blank at the end that will be preserved -->
+    <string name="loading">Loading ...</string>
+    <string name="error">Error:&#160;</string>
+    <string name="http_error">HTTP Error:&#160;</string>
+    <string name="status_not_success">Result status other than "SUCCESS":&#160;</string>
 </resources>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Chuck Norris Facts</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="refresh_hinweis">Text oben berühren, um anderen <i>Chuck Norris Fact</i> zu laden.</string>
+
+    <!-- Texte, die aus Java-Code heraus ausgelesen werden sollen;
+         "&#160;" ist ein Leerzeichen, das bei der Ausgabe erhalten bleibt. -->
+    <string name="loading">Lade ...</string>
+    <string name="error">Fehler:&#160;</string>
+    <string name="http_error">HTTP-Fehler:&#160;</string>
+    <string name="status_not_success">Anderer Ergebnis-Status als "SUCCESS":&#160;</string>
+
+</resources>
