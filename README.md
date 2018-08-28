@@ -18,9 +18,7 @@ written using [*android.util.Log*](https://developer.android.com/reference/andro
 ----
 ## Screenshots
 
-![Screenshot 1](screenshot_1.png)
-
-![Screenshot 2](screenshot_2.png)
+![Screenshot 1](screenshot_1.png) ![Screenshot 2](screenshot_2.png)
 
 Screenshots were taken from emulator.
 
