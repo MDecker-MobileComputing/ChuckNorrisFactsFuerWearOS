@@ -17,8 +17,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+
 /**
- * Activity fetches "Chuck Norris Facts" (short jokes) from Web-API.
+ * Activity fetches "Chuck Norris Facts" (short jokes) from Web-API and displays them.
  * <br><br>
  *
  * Alternate approach for refresh of joke might be
@@ -35,7 +36,7 @@ import java.net.URL;
 public class MainActivity extends WearableActivity
                           implements View.OnClickListener {
 
-    /** Kennzeichnungs-String ("Schildchen") für Log-Nachrichten. */
+    /** Kennzeichnungs-String ("Schildchen") für alle Log-Nachrichten in dieser App. */
     public static final String TAG4LOGGING = "ChuckNorris";
 
 
@@ -70,7 +71,7 @@ public class MainActivity extends WearableActivity
      * Event-Handler-Methode, lädt neuen Witz (wenn nicht bereits ein anderer
      * Ladevorgang läuft).
      *
-     * @param view Element, das Event ausgelöst hat.
+     * @param view  Element, das Event ausgelöst hat.
      */
     @Override
     public void onClick(View view) {
@@ -90,7 +91,7 @@ public class MainActivity extends WearableActivity
      * (ändernde UI-Zugriffe sollten nur aus Main-Thread
      *  heraus vorgenommen werden).
      *
-     * @param text Text, der in TextView angezeigt werden soll.
+     * @param text  Text, der in TextView angezeigt werden soll.
      */
     protected void zeigeTextInMainThread(String text) {
 
@@ -211,9 +212,9 @@ public class MainActivity extends WearableActivity
      * Methode für parsen der JSON-Antwort von der Web-API, um den eigentlichen
      * Witz zu erhalten.
      *
-     * @param jsonString Komplettes JSON-Dokument, das von der Web-API geliefert wurde
+     * @param jsonString  Komplettes JSON-Dokument, das von der Web-API geliefert wurde
      *
-     * @return String mit Kurzwitz
+     * @return  String mit Kurzwitz
      *
      * @throws JSONException Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
      *                       für einen bestimmten Key kein Wert des entsprechenden
