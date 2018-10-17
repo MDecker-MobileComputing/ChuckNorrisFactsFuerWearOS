@@ -61,9 +61,7 @@ public class MainActivity extends WearableActivity
 
         setAmbientEnabled(); // Enables Always-on
 
-        MeinThread mt = new MeinThread();
-        mt.start();
-        // Kurzform: new MeinThread().start();
+        ladeWitzImHintergrund();
     }
 
 
@@ -79,9 +77,19 @@ public class MainActivity extends WearableActivity
             Log.i(TAG4LOGGING, "Es läuft schon ein Ladevorgang.");
             return;
         }
-
+        ladeWitzImHintergrund();
+    }
+    
+    
+    /**
+     * Erzeugt Thread-Objekt und startet es auch gleich.
+     */
+    protected void ladeWitzImHintergrund() {
+    
         MeinThread mt = new MeinThread();
-        mt.start();
+        mt.start(); 
+        
+        // Kurzform: new MeinThread().start();
     }
 
 
@@ -138,14 +146,13 @@ public class MainActivity extends WearableActivity
 
             _ladevorgangLaueft = true;
 
-
-            zeigeTextInMainThread( getString(R.string.loading ));
+            zeigeTextInMainThread( getString(R.string.loading) );
 
             String ergebnisStr = holeWitz();
             if (ergebnisStr.length() > 0) {
 
                 try {
-                    String witz = extrahiereWitzAusJson(ergebnisStr);
+                    String witz = extrahiereWitzAusJson( ergebnisStr );
                     zeigeTextInMainThread( witz );
                 }
                 catch (JSONException ex) {
@@ -176,7 +183,7 @@ public class MainActivity extends WearableActivity
 
         try {
             URL url = new URL("http://api.icndb.com/jokes/random?limitTo=[nerdy]");
-            conn = (HttpURLConnection)url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET"); // Eigentlich nicht nötig, weil "GET" Default-Wert ist.
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -185,7 +192,7 @@ public class MainActivity extends WearableActivity
 
             } else {
 
-                InputStream is = conn.getInputStream();
+                InputStream is        = conn.getInputStream();
                 InputStreamReader ris = new InputStreamReader(is);
                 BufferedReader reader = new BufferedReader(ris);
 
@@ -216,9 +223,9 @@ public class MainActivity extends WearableActivity
      *
      * @return  String mit Kurzwitz
      *
-     * @throws JSONException Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
-     *                       für einen bestimmten Key kein Wert des entsprechenden
-     *                       Datentypes gefunden wird.
+     * @throws JSONException  Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
+     *                        für einen bestimmten Key kein Wert des entsprechenden
+     *                        Datentypes gefunden wird.
      */
     protected String extrahiereWitzAusJson(String jsonString) throws JSONException {
 
@@ -242,7 +249,7 @@ public class MainActivity extends WearableActivity
         Log.i(TAG4LOGGING, "Witz " + witzID + ": " + witzString);
 
         // Sonderzeichen ersetzen
-        witzString = witzString.replace("&quot;", "\""); // Anführungszeichen ersetzen
+        witzString = witzString.replace("&quot;", "\""); // ggf. Anführungszeichen ersetzen
 
         return witzString;
     }
