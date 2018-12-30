@@ -56,7 +56,7 @@ public class MainActivity extends WearableActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _textView = (TextView) findViewById(R.id.text);
+        _textView = findViewById(R.id.text);
         _textView.setOnClickListener(this);
 
         setAmbientEnabled(); // Enables Always-on
@@ -73,6 +73,7 @@ public class MainActivity extends WearableActivity
      */
     @Override
     public void onClick(View view) {
+
         if (_ladevorgangLaueft == true) {
             Log.i(TAG4LOGGING, "Es läuft schon ein Ladevorgang.");
             return;
@@ -89,7 +90,7 @@ public class MainActivity extends WearableActivity
         MeinThread mt = new MeinThread();
         mt.start(); 
         
-        // Kurzform: new MeinThread().start();
+        // Als Einzeiler: new MeinThread().start();
     }
 
 
@@ -172,7 +173,7 @@ public class MainActivity extends WearableActivity
 
 
     /**
-     * Methode mit HTTP-Zugriff, muss in Hintergrund-Thread ausgeführt werden!
+     * Methode mit HTTP-Zugriff, muss in Hintergrund-Thread (Worker-Thread) ausgeführt werden!
      *
      * @return HTTP-Response-String oder leerer String bei Fehler (aber nicht <i>null</i>).
      */
@@ -221,7 +222,7 @@ public class MainActivity extends WearableActivity
      *
      * @param jsonString  Komplettes JSON-Dokument, das von der Web-API geliefert wurde
      *
-     * @return  String mit Kurzwitz
+     * @return  String mit dem Kurzwitz
      *
      * @throws JSONException  Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
      *                        für einen bestimmten Key kein Wert des entsprechenden
