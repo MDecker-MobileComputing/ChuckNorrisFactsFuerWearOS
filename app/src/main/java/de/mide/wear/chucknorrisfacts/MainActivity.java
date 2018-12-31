@@ -1,5 +1,6 @@
 package de.mide.wear.chucknorrisfacts;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -53,6 +54,7 @@ public class MainActivity extends WearableActivity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -61,7 +63,7 @@ public class MainActivity extends WearableActivity
 
         setAmbientEnabled(); // Enables Always-on
 
-        ladeWitzImHintergrund();
+        ladeWitz();
     }
 
 
@@ -78,48 +80,21 @@ public class MainActivity extends WearableActivity
             Log.i(TAG4LOGGING, "Es läuft schon ein Ladevorgang.");
             return;
         }
-        ladeWitzImHintergrund();
+        ladeWitz();
     }
     
     
     /**
-     * Erzeugt Thread-Objekt und startet es auch gleich.
+     * Erzeugt eine Instanz von {@link MeinAsyncTask} und startet sie.
+     * Dadurch wird der Zugriff auf die Web-API in einem Worker-Thread
+     * durchgeführt.
      */
-    protected void ladeWitzImHintergrund() {
-    
-        MeinThread mt = new MeinThread();
-        mt.start(); 
-        
-        // Als Einzeiler: new MeinThread().start();
-    }
+    protected void ladeWitz() {
 
+        MeinAsyncTask mat = new MeinAsyncTask();
+        mat.execute();
 
-    /**
-     * Methode übergibt Runnable-Objekt an Main-Thread, um
-     * als Argument übergebenen Text in TextView zu setzen
-     * (ändernde UI-Zugriffe sollten nur aus Main-Thread
-     *  heraus vorgenommen werden).
-     *
-     * @param text  Text, der in TextView angezeigt werden soll.
-     */
-    protected void zeigeTextInMainThread(String text) {
-
-        // Für Instanz von anonymer Klasse muss der String (Closure)
-        // muss die lokale Variable nicht-änderbar sein.
-        final String text2 = text;
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                _textView.setText(text2);
-            }
-        };
-
-        runOnUiThread(runnable);
-
-        // Alternative zu runOnUIThread(): Runnable-Objekt an Methode "post()"
-        // von beliebigem View-Element übergeben.
-        //_textView.post(runnable);
+        //Als Einzeiler: new MeinAsyncTask().execute();
     }
 
 
@@ -128,42 +103,64 @@ public class MainActivity extends WearableActivity
     /* *************************************** */
 
     /**
-     * Innere Klasse für Netzwerk-Zugriff und Auswertung Ergebnis-Dokument
-     * (Parsen der JSON-Datei, die als Antwort von der Web-API geschickt wurde).
-     * Nach Erzeugung einer Instanz dieser Klasse muss die Methode
-     * {@link Thread#start()} aufgerufen werden (<b>NICHT</b> die
-     * Methode {@link Thread#run()} direkt aufrufen, sonst wird der
-     * Code nicht in einem Hintergrund-Thread ausgeführt).
+     * Ein Objekt dieser Klasse führt den Netzwerk-Zugriff für den Aufruf
+     * der Web-API und das anschließende Parsen des als Antwort erhaltenen
+     * JSON-Dokuments in einem Worker-Thread (Hintergrund-Thread) durch.
      */
-    protected class MeinThread extends Thread {
+    protected class MeinAsyncTask extends AsyncTask<Void,Void,String> {
 
         /**
-         * Inhalt der run()-Methode einer Unterklasse von Thread
-         * wird in einem Hintergrund-Thread ausgeführt, wenn
-         * das Thread-Objekt mit der Methode {@link Thread#start()}
+         * Diese Methode wird vor der Methode {@link MeinAsyncTask#doInBackground(Void...)}
+         * ausgeführt, und zwar im Main-Thread. In ihr können deshalb Änderungen an der UI
+         * vorgenommen werden. Die Methode ändert den vom {@link TextView}-Element angezeigten
+         * Text auf eine Meldung, die besagt, dass der Ladevorgang läuft.
          */
         @Override
-        public void run() {
+        protected void onPreExecute() {
 
-            _ladevorgangLaueft = true;
+            String text = getString( R.string.loading );
+            _textView.setText( text );
+        }
 
-            zeigeTextInMainThread( getString(R.string.loading) );
 
-            String ergebnisStr = holeWitz();
-            if (ergebnisStr.length() > 0) {
+        /**
+         * Diese Methode führt den Zugriff auf die Web-API und das Extrahieren
+         * des Witz aus der empfangenen JSON-Datei in einem Worker-Thread (also
+         * nicht im Main-Thread) durch.
+         *
+         * @param voids  Dies Methode benötigt keine Parameter.
+         * @return  String mit dem Witz (Chuck Norris Fact).
+         */
+        @Override
+        public String doInBackground(Void... voids) {
 
-                try {
-                    String witz = extrahiereWitzAusJson( ergebnisStr );
-                    zeigeTextInMainThread( witz );
-                }
-                catch (JSONException ex) {
-                    Log.e(TAG4LOGGING, "Fehler beim Parsen des JSON-Strings: " + ex.getMessage());
-                    zeigeTextInMainThread( getString(R.string.error) + ex.getMessage() );
-                }
+            try {
 
-            } else {
-                Log.w(TAG4LOGGING, "Leerer String als JSON-Antwort von Methode holeWitz() erhalten.");
+                String jsonString = holeWitz();
+
+                String witzString = extrahiereWitzAusJson( jsonString );
+
+                return witzString;
+
+            } catch (Exception ex) {
+
+                Log.e(TAG4LOGGING, "Exception: " + ex);
+                return "Error: " + ex.getMessage();
             }
+        }
+
+        /**
+         * Diese Methode wird unmittelbar nach Beendigung der Methode {@link #doInBackground(Void...)}
+         * angezeigt. Sie wird im Main-Thread ausgeführt und zeigt das Ergebnis dieser Methode auf
+         * dem {@link TextView}-Element an.
+         *
+         * @param resultString  Der String mit dem anzuzeigenden Text (Witz, wenn kein Fehler
+         *                      aufgetreten ist, oder eine Fehlermeldung).
+         */
+        @Override
+        protected void onPostExecute(String resultString) {
+
+            _textView.setText( resultString );
         }
     };
 
@@ -176,40 +173,35 @@ public class MainActivity extends WearableActivity
      * Methode mit HTTP-Zugriff, muss in Hintergrund-Thread (Worker-Thread) ausgeführt werden!
      *
      * @return HTTP-Response-String oder leerer String bei Fehler (aber nicht <i>null</i>).
+     *
+     * @throws Exception  Fehler beim Internet-Zugriff.
      */
-    protected String holeWitz() {
+    protected String holeWitz() throws Exception {
 
-        HttpURLConnection conn      = null;
-        String httpErgebnisDokument = "";
+        URL               url                  = null;
+        HttpURLConnection conn                 = null;
+        String            httpErgebnisDokument = "";
 
-        try {
-            URL url = new URL("http://api.icndb.com/jokes/random?limitTo=[nerdy]");
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET"); // Eigentlich nicht nötig, weil "GET" Default-Wert ist.
+        url  = new URL("http://api.icndb.com/jokes/random?exclude=[explicit]");
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET"); // Eigentlich nicht nötig, weil "GET" Default-Wert ist.
 
-            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 
-                zeigeTextInMainThread( getString(R.string.http_error) + conn.getResponseMessage() );
+            String errorMessage = getString(R.string.http_error) + conn.getResponseMessage();
+            throw new Exception( errorMessage );
 
-            } else {
+        } else {
 
-                InputStream is        = conn.getInputStream();
-                InputStreamReader ris = new InputStreamReader(is);
-                BufferedReader reader = new BufferedReader(ris);
+            InputStream is        = conn.getInputStream();
+            InputStreamReader ris = new InputStreamReader(is);
+            BufferedReader reader = new BufferedReader(ris);
 
-                String zeile = "";
-                while ( (zeile = reader.readLine()) != null) {
-                    httpErgebnisDokument += zeile;
-                }
+            // JSON-Dokument zeilenweise einlesen
+            String zeile = "";
+            while ( (zeile = reader.readLine()) != null) {
+                httpErgebnisDokument += zeile;
             }
-        }
-        catch (Exception ex) {
-            Log.e(TAG4LOGGING, "Fehler beim HTTP-Zugriff: " + ex.getMessage());
-            zeigeTextInMainThread( getString(R.string.error) + ex.getMessage() );
-        }
-        finally {
-            if (conn != null) { conn.disconnect(); }
-            _ladevorgangLaueft = false;
         }
 
         return httpErgebnisDokument;
@@ -222,7 +214,7 @@ public class MainActivity extends WearableActivity
      *
      * @param jsonString  Komplettes JSON-Dokument, das von der Web-API geliefert wurde
      *
-     * @return  String mit dem Kurzwitz
+     * @return  String mit dem Kurzwitz (Chuck Norris Fact).
      *
      * @throws JSONException  Fehler beim Parsen des JSON-Objekts; wird geworfen, wenn
      *                        für einen bestimmten Key kein Wert des entsprechenden

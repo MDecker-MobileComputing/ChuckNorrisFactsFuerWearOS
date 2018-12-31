@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">api.icndb.com</domain>
+    </domain-config>
+</network-security-config>
+<!-- To find out why this is needed see https://stackoverflow.com/a/50834600/1364368 -->
