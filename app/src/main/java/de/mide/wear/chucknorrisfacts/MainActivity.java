@@ -38,6 +38,17 @@ public class MainActivity extends WearableActivity
     /** Kennzeichnungs-String ("Schildchen") für alle Log-Nachrichten in dieser App. */
     public static final String TAG4LOGGING = "ChuckNorris";
 
+    /**
+     * Es wird die URL für eine ungesichterte HTTP-Verbindung ("http://" statt "https://"
+     * verwendet), weil es bei Ausführung der App im Emulator sonst wahrscheinlich zu
+     * einer Exception wegen einem Fehler bei der Validierung der Certificate Chain kommt.
+     * Da WearOS/Android in neueren Versionen bei ungesicherten HTTP-Verbindungen eine Exception
+     * wirft, muss die Domain dieser URL in eine Whitelist eingetragen werden, siehe Datei
+     * <code></code>res/xml/network_security_config.xml</code>, die im <code>application</code>-Tag
+     * in der Manifest-Datei referenziert wird.
+     */
+    protected static final String WEB_API_URL = "http://api.icndb.com/jokes/random?exclude=[explicit]";
+
 
     /** UI-Element zur Darstellung von Ergebnis und Fehlermeldungen. */
     protected TextView _ergebnisTextView = null;
@@ -197,7 +208,7 @@ public class MainActivity extends WearableActivity
         HttpURLConnection conn                 = null;
         String            httpErgebnisDokument = "";
 
-        url  = new URL("http://api.icndb.com/jokes/random?exclude=[explicit]");
+        url  = new URL(WEB_API_URL);
         conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET"); // Eigentlich nicht nötig, weil "GET" Default-Wert ist.
 

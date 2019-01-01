@@ -4,4 +4,16 @@
         <domain includeSubdomains="false">api.icndb.com</domain>
     </domain-config>
 </network-security-config>
-<!-- To find out why this is needed see https://stackoverflow.com/a/50834600/1364368 -->
+<!--
+      Diese Datei muss im <application>-Tag der Manifest-Datei
+      im Attribut "android:networkSecurityConfig" referenziert werden.
+
+      In neueren WearOS/Android-Versionen wird bei ungesicherten HTTP-Verbindungen
+      (also http statt httpS) eine Exception geworfen ("Cleartext HTTP traffic
+      not permitted"); wir könnten auch eine https-URL für die Abfrage der
+      Web-API verwenden ( https://api.icndb.com/jokes/random?exclude=[explicit] ),
+      aber dann würde es im Emulator wahrscheinlich zu einem Fehler bei der
+      Zertifikatsvalidierung kommen.
+
+      Siehe auch https://stackoverflow.com/a/50834600/1364368
+  -->
