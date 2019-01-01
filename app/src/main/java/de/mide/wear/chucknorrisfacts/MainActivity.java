@@ -6,12 +6,10 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,7 +40,11 @@ public class MainActivity extends WearableActivity
 
 
     /** UI-Element zur Darstellung von Ergebnis und Fehlermeldungen. */
-    protected TextView _textView = null;
+    protected TextView _ergebnisTextView = null;
+
+    /** UI-Element für Text "Text oben berühren, um anderen Chuck Norris Fact zu laden";
+     *  das Element wird während des Ladevorgangs auf unsichtbar geschaltet. */
+    protected TextView _bedienungshinweisTextview = null;
 
     /** Flag, um mehrere gleichzeitige Ladevorgänge zu verhindern. */
     protected boolean _ladevorgangLaueft = false;
@@ -58,8 +60,10 @@ public class MainActivity extends WearableActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _textView = findViewById(R.id.text);
-        _textView.setOnClickListener(this);
+        _ergebnisTextView = findViewById(R.id.text);
+        _ergebnisTextView.setOnClickListener(this);
+
+        _bedienungshinweisTextview = findViewById(R.id.bedienungshinweisTextview);
 
         setAmbientEnabled(); // Enables Always-on
 
@@ -71,7 +75,7 @@ public class MainActivity extends WearableActivity
      * Event-Handler-Methode, lädt neuen Witz (wenn nicht bereits ein anderer
      * Ladevorgang läuft).
      *
-     * @param view  Element, das Event ausgelöst hat.
+     * @param view  Element, das Event ausgelöst hat (nämlich {@link #_ergebnisTextView}.
      */
     @Override
     public void onClick(View view) {
@@ -80,6 +84,7 @@ public class MainActivity extends WearableActivity
             Log.i(TAG4LOGGING, "Es läuft schon ein Ladevorgang.");
             return;
         }
+
         ladeWitz();
     }
     
@@ -114,12 +119,17 @@ public class MainActivity extends WearableActivity
          * ausgeführt, und zwar im Main-Thread. In ihr können deshalb Änderungen an der UI
          * vorgenommen werden. Die Methode ändert den vom {@link TextView}-Element angezeigten
          * Text auf eine Meldung, die besagt, dass der Ladevorgang läuft.
+         * Außerdem wird das UI-Element {@link #_bedienungshinweisTextview} auf "unsichtbar"
+         * geschaltet (es wird in {@link MeinAsyncTask#onPostExecute(String)} wieder
+         * auf "sichtbar" geschaltet).
          */
         @Override
         protected void onPreExecute() {
 
             String text = getString( R.string.loading );
-            _textView.setText( text );
+            _ergebnisTextView.setText( text );
+
+            _bedienungshinweisTextview.setVisibility(View.INVISIBLE);
         }
 
 
@@ -153,6 +163,9 @@ public class MainActivity extends WearableActivity
          * Diese Methode wird unmittelbar nach Beendigung der Methode {@link #doInBackground(Void...)}
          * angezeigt. Sie wird im Main-Thread ausgeführt und zeigt das Ergebnis dieser Methode auf
          * dem {@link TextView}-Element an.
+         * Außerdem wird das UI-Element {@link #_bedienungshinweisTextview} auf "sichtbar"
+         * geschaltet (es wurde in {@link MeinAsyncTask#onPreExecute()} auf "unsichtbar"
+         * geschaltet).
          *
          * @param resultString  Der String mit dem anzuzeigenden Text (Witz, wenn kein Fehler
          *                      aufgetreten ist, oder eine Fehlermeldung).
@@ -160,7 +173,9 @@ public class MainActivity extends WearableActivity
         @Override
         protected void onPostExecute(String resultString) {
 
-            _textView.setText( resultString );
+            _ergebnisTextView.setText( resultString );
+
+            _bedienungshinweisTextview.setVisibility(View.VISIBLE);
         }
     };
 
@@ -233,7 +248,7 @@ public class MainActivity extends WearableActivity
         // Unterobjekt mit dem eigentlichen Witz holen.
         JSONObject unterObjekt = mainObjekt.getJSONObject("value");
 
-        int witzID        = unterObjekt.getInt("id");
+        int    witzID     = unterObjekt.getInt("id");
         String witzString = unterObjekt.getString("joke");
         // unterObjekt hat unter dem Key "categories" noch einen Array mit den
         // gewählten Kategorien (z.B. "nerdy" oder "explicit"), aber das
