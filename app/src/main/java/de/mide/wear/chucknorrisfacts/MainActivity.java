@@ -253,27 +253,27 @@ public class MainActivity extends WearableActivity
      */
     protected String extrahiereWitzAusJson(String jsonString) throws JSONException {
 
-        JSONObject mainObjekt = new JSONObject(jsonString);
+        JSONObject hauptObjekt = new JSONObject(jsonString);
 
-        String typeString = mainObjekt.getString("type");
+        String typeString = hauptObjekt.getString("type");
 
         if (typeString.equalsIgnoreCase("success") == false) {
             throw new JSONException( getString( R.string.status_not_success) + typeString );
         }
 
         // Unterobjekt mit dem eigentlichen Witz holen.
-        JSONObject unterObjekt = mainObjekt.getJSONObject("value");
+        JSONObject unterObjekt = hauptObjekt.getJSONObject("value");
 
         int    witzID     = unterObjekt.getInt("id");
         String witzString = unterObjekt.getString("joke");
         // unterObjekt hat unter dem Key "categories" noch einen Array mit den
-        // gewählten Kategorien (z.B. "nerdy" oder "explicit"), aber das
-        // lesen wir nicht aus.
+        // gewählten Kategorien (z.B. "nerdy" oder "explicit"), aber das lesen
+        // wir nicht aus.
 
         Log.i(TAG4LOGGING, "Witz " + witzID + ": " + witzString);
 
-        // Sonderzeichen ersetzen
-        witzString = witzString.replace("&quot;", "\""); // ggf. Anführungszeichen ersetzen
+        // ggf. Anführungszeichen ersetzen
+        witzString = witzString.replace("&quot;", "\"");
 
         return witzString;
     }
