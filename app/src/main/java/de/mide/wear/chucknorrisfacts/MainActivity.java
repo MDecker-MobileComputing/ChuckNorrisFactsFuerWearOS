@@ -107,6 +107,8 @@ public class MainActivity extends WearableActivity
      */
     protected void ladeWitz() {
 
+        _ladevorgangLaueft = true;
+
         MeinAsyncTask mat = new MeinAsyncTask();
         mat.execute();
 
@@ -150,6 +152,7 @@ public class MainActivity extends WearableActivity
          * nicht im Main-Thread) durch.
          *
          * @param voids  Dies Methode benötigt keine Parameter.
+         *
          * @return  String mit dem Witz (Chuck Norris Fact).
          */
         @Override
@@ -186,7 +189,9 @@ public class MainActivity extends WearableActivity
 
             _ergebnisTextView.setText( resultString );
 
-            _bedienungshinweisTextview.setVisibility(View.VISIBLE);
+            _bedienungshinweisTextview.setVisibility( View.VISIBLE );
+
+            _ladevorgangLaueft = false;
         }
     };
 
