@@ -103,17 +103,50 @@ public class MainActivity extends WearableActivity
     /**
      * Erzeugt eine Instanz von {@link MeinAsyncTask} und startet sie.
      * Dadurch wird der Zugriff auf die Web-API in einem Worker-Thread
-     * durchgeführt.
+     * durchgeführt, was zu einem Fehler führt.
      */
     protected void ladeWitz() {
 
         _ladevorgangLaueft = true;
 
+        /*
         MeinAsyncTask mat = new MeinAsyncTask();
         mat.execute();
+        */
 
-        //Als Einzeiler: new MeinAsyncTask().execute();
+        ladeWitzInMainThread();
     }
+
+
+    /**
+     * Wenn diese Methode statt der Ausführung einer Instanz von {@link MeinAsyncTask}
+     * in der Methode {@link #ladeWitz()} ausgeführt wird, dann wird der Web-API-Zugriff
+     * (Internet-Zugriff) im Main-Thread ausgeführt.
+     * Hierbei wird eine {@link android.os.NetworkOnMainThreadException} geworfen.
+     */
+    protected void ladeWitzInMainThread() {
+
+        String text = getString( R.string.loading );
+        _ergebnisTextView.setText( text );
+        _bedienungshinweisTextview.setVisibility( View.INVISIBLE );
+
+        try {
+            String jsonString = holeWitz();
+            String witzString = extrahiereWitzAusJson(jsonString);
+
+            _ergebnisTextView.setText(witzString);
+
+        } catch (Exception ex) {
+
+            String errorText = "Error: " + ex;
+            Log.e(TAG4LOGGING, errorText, ex);
+            _ergebnisTextView.setText(errorText);
+        }
+
+        _bedienungshinweisTextview.setVisibility(View.VISIBLE);
+        _ladevorgangLaueft = false;
+    }
+
 
 
     /* *************************************** */
